@@ -1,5 +1,5 @@
 /**
-* Get the data via HTTP request
+* Get the data from TeamServer via a given endpoint
 * @param endpoint to call, such as '/security/audit?expand=skip_links&limit=10000' to get the most recent 1,000 entries from the audit log
 * @return an array of data
 */
