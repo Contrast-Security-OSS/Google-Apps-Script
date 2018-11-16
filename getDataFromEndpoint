@@ -1,0 +1,36 @@
+/**
+* Get the data via HTTP request
+* @param endpoint to call, such as '/security/audit?expand=skip_links&limit=10000' to get the most recent 1,000 entries from the audit log
+* @return an array of data
+*/
+function getDataFromEndpoint(endpoint){
+  /*
+  * Fill variables
+  */
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('configurations');  
+  var ORGANIZATION_ID    = sheet.getRange("B3").getValues()+"";
+  var TEAMSERVER_URL     = sheet.getRange("B2").getValues()+"";
+  var API_KEY            = sheet.getRange("B4").getValues()+"";
+  var AUTHORIZATION      = Utilities.base64Encode(sheet.getRange("B6").getValues()+":"+sheet.getRange("B5").getValues());  
+  
+  var headers = {
+    "API-Key":       API_KEY,
+    "Authorization": AUTHORIZATION,
+  }
+  var options = {
+    "method" : "get",
+    "headers" : headers 
+  };
+  /* endpoint: Get libraries scores breakdown */
+  var url = TEAMSERVER_URL + ORGANIZATION_ID + endpoint;
+  
+  
+  /*
+  * Get data
+  */
+  var response = UrlFetchApp.fetch(url,options);
+  var json = response.getContentText();
+  var data = JSON.parse(json);
+  
+  return data;
+}
