@@ -1,0 +1,48 @@
+/**
+* Output a list of the most recent 1,000 entries from the audit log
+* Assumes:
+* <ul>
+* <li>that the function getDataFromEndpoint is available
+* <li>a Sheet named "getAuditLog Data" is present
+* </ul>
+*/
+function getAuditLog(){
+  Logger.log("getAuditLog");
+
+  /*
+  * Get data
+  */
+  var data = getDataFromEndpoint('/security/audit?expand=skip_links&limit=1000');
+  var logs = data['logs'];
+  data = null;
+
+  /* prepare data */
+  var content =[];
+  if (logs === undefined || logs.length<=0){
+    Logger.log("No logs found");
+  } else {
+    for (i in logs){
+      content.push([
+        (new Date(1970,0,((((logs[i].date/1000)/60)/60)/24)+1)),
+        logs[i].message
+      ]);
+    }
+  }  
+  logs = null;
+  
+  /*
+  * Fill sheet
+  */
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('getAuditLog Data');
+  sheet.clear();  // empty sheet
+  sheet.appendRow(["Date","Message"]);
+  var destinationRange = sheet.getRange("A2:B"+(content.length+1));
+  destinationRange.setValues(content);
+  
+  /* Format sheet */
+  var cells = sheet.getRange('A1:1');
+  cells.setFontWeight('bold');
+  cells = sheet.getRange("A2:A");
+  cells.setNumberFormat("YYYY-MM-DD");  // ISO-8601
+  sheet.setFrozenRows(1);
+}
